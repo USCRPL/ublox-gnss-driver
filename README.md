@@ -1,6 +1,6 @@
 # Mbed OS U-Blox GPS Driver
 
-[!U-Blox MAX-8 module](https://media.digikey.com/Photos/U-Blox%20America/MFG_MAX-8.jpg)
+![U-Blox MAX-8 module](https://media.digikey.com/Photos/U-Blox%20America/MFG_MAX-8.jpg)
 
 This driver can be used in Mbed OS projects to interact with U-Blox Gen8 and Gen9 GNSS modules.  This driver uses U-Blox's UBX protocol, and can communicate with the GNSSs over either I2C or SPI.  Basic information (position, velocity, and time) is supported, as well as timepulse for Gen8 modules and raw satellite information for Gen9 modules.  If you need more, since the driver provides common parsing infrastructure for any UBX messages, it's easy to add these!
 
