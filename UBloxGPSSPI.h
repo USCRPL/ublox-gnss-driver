@@ -83,7 +83,7 @@ private:
     const int spiClockRate_;
 
     /** The maximum SPI frequency, in Hz (5.5 MHz) */
-#define SPI_MAX_SPEED 5500000
+#define UBLOX_SPI_MAX_SPEED 5500000
 };
 };
 

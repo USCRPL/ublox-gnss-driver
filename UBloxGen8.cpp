@@ -1,20 +1,12 @@
-#include <MAX8U.h>
+#include <UBloxGen8.h>
 
 namespace UBlox
 {
-MAX8U::MAX8U()
+UBloxGen8::UBloxGen8()
 {
 }
 
-MAX8UI2C::MAX8UI2C(
-    PinName sdaPin, PinName sclPin, PinName rstPin, uint8_t i2cAddress, int i2cPortSpeed)
-    : UBloxGPS(rstPin)
-    , UBloxGPSI2C(sdaPin, sclPin, rstPin, i2cAddress, i2cPortSpeed)
-    , MAX8U()
-{
-}
-
-bool MAX8U::configure()
+bool UBloxGen8::configure()
 {
     // Configure DDC(I2C) by writing
 
@@ -78,7 +70,7 @@ bool MAX8U::configure()
     return saveSettings();
 }
 
-bool MAX8U::configureTimepulse(uint32_t frequency, float onPercentage, chrono::nanoseconds delayTime)
+bool UBloxGen8::configureTimepulse(uint32_t frequency, float onPercentage, chrono::nanoseconds delayTime)
 {
     /**
      * @brief Parameters to configure timepulse
@@ -135,7 +127,7 @@ bool MAX8U::configureTimepulse(uint32_t frequency, float onPercentage, chrono::n
     }
 }
 
-bool MAX8U::setMessageEnabled(uint8_t messageClass, uint8_t messageID, bool enabled)
+bool UBloxGen8::setMessageEnabled(uint8_t messageClass, uint8_t messageID, bool enabled)
 {
     static constexpr size_t DATA_LEN = 3;
     uint8_t data[DATA_LEN];
@@ -159,9 +151,9 @@ bool MAX8U::setMessageEnabled(uint8_t messageClass, uint8_t messageID, bool enab
 }
 
 
-bool MAX8U::saveSettings()
+bool UBloxGen8::saveSettings()
 {
-    static constexpr size_t DATA_LEN = 12;
+    static constexpr size_t DATA_LEN = 13;
     uint8_t data[DATA_LEN];
 
     // don't clear any settings
@@ -173,20 +165,12 @@ bool MAX8U::saveSettings()
     data[6] = 0;
     data[7] = 0;
 
+    // Don't load any settings
     memset(data + 8, 0, 4);
 
+    // Save in battery-backed RAM and flash.
+    data[12] = 0b11;
+
     return sendCommand(UBX_CLASS_CFG, UBX_CFG_CFG, data, DATA_LEN, true, false, 1s);
-}
-
-void MAX8UI2C::setCFG_PRTPayload(uint8_t* data)
-{
-    data[0] = 0; // Port Id
-    data[4] = (i2cAddress_ << 1);
-}
-
-void MAX8USPI::setCFG_PRTPayload(uint8_t* data)
-{
-    data[0] = 4; // Port Id
-    data[4] = 0; // SPI mode 0
 }
 }

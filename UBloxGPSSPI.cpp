@@ -1,4 +1,4 @@
-#include "ScopeGuard.h"
+#include "internal/ScopeGuard.h"
 #include "UBloxGPSSPI.h"
 
 namespace UBlox
@@ -7,7 +7,7 @@ UBloxGPSSPI::UBloxGPSSPI(PinName user_MOSIpin, PinName user_MISOpin, PinName use
     PinName user_SCLKpin, PinName user_CSPin, int spiClockRate)
     : UBloxGPS(user_RSTpin)
     , spiPort_(user_MOSIpin, user_MISOpin, user_SCLKpin, user_CSPin, use_gpio_ssel)
-    , spiClockRate_(std::min(spiClockRate, SPI_MAX_SPEED))
+    , spiClockRate_(std::min(spiClockRate, UBLOX_SPI_MAX_SPEED))
 {
     spiPort_.format(8, 0); // Setup SPI for 8 bit data, SPI Mode 0. UBLox8 default is SPI Mode 0
     spiPort_.frequency(spiClockRate_);

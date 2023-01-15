@@ -219,7 +219,7 @@ bool UBloxGPS::checkVersion(bool printVersion, bool printExtraInfo)
         return false;
     }
 
-    if (printVersion || UBloxGPS_DEBUG)
+    if (printVersion || UBLOX_GNSS_DEBUG)
     {
         printf("-> %s Software Version: \r\n", getName());
         printf("-> %s\r\n", rxBuffer + UBX_DATA_OFFSET);
@@ -468,7 +468,7 @@ bool UBloxGPS::verifyChecksum(uint32_t messageLength)
 
 int UBloxGPS::DEBUG_TR(const char* format, ...)
 {
-#if UBloxGPS_TRANSACTION_DEBUG
+#if UBLOX_GNSS_TRANSACTION_DEBUG
     std::va_list arg;
     va_start(arg, format);
     int r = vprintf(format, arg);
@@ -481,7 +481,7 @@ int UBloxGPS::DEBUG_TR(const char* format, ...)
 
 int UBloxGPS::DEBUG(const char* format, ...)
 {
-#if UBloxGPS_DEBUG
+#if UBLOX_GNSS_DEBUG
     std::va_list arg;
     va_start(arg, format);
     fflush(static_cast<std::FILE*>(*serialPort));

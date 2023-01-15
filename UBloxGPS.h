@@ -6,11 +6,6 @@
 #include "mbed.h"
 #include <cinttypes>
 
-#define UBloxGPS_DEBUG 0
-
-// Enable to print bytes sent and received in each SPI transaction
-#define UBloxGPS_TRANSACTION_DEBUG 0
-
 namespace UBlox
 {
 using us_time = std::chrono::microseconds;
