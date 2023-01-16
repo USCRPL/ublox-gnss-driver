@@ -50,6 +50,11 @@ public:
      */
     bool configure() override;
 
+    int getGPSGeneration() override
+    {
+        return 9;
+    }
+
 protected:
 
     uint8_t msgOutOffset_;

@@ -22,6 +22,11 @@ public:
      */
     virtual bool configure() override;
 
+    int getGPSGeneration() override
+    {
+        return 8;
+    }
+
     /**
      * Enables timepulse functionality for the sensor
      */

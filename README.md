@@ -10,6 +10,8 @@ This driver was written and maintained by several members of USC Rocket Propulsi
 - Jay Sridharan
 - Jasper Swallen
 
+For example usage, see [the demo project](https://github.com/mbed-ce/ublox-gnss-demo).
+
 # About the GNSS Modules
 
 There are a huge range of U-Blox GNSS modules, from small, cheap QFN chips designed for consumer products, all the way up to high-end multi-GNSS receivers that can provide extremely accurate time and position information.  A summary of their product line is available [here](https://www.u-blox.com/sites/default/files/GNSS_LineCard_UBX-13004717.pdf).

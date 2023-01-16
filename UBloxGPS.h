@@ -90,6 +90,11 @@ public:
     void printGNSSConfig();
 
     /**
+     * Get the GPS generation number.  Currently 8 and 9 are implemented in this driver.
+     */
+    virtual int getGPSGeneration() = 0;
+
+    /**
      * Reads information from the GPS about all the satellites it can see and
      * populates the given buffer.
      *
@@ -197,7 +202,11 @@ public:
     /**
      * @brief Configure the GPS with the appropriate communications and message settings for this
      * driver. and save the configuration to NVM on the chip. After initial configuration, the
-     * settings should be reloaded automatically on power-up
+     * settings should be reloaded automatically on power-up.
+     *
+     * However, note that on modules without flash memory, the configuration will be lost if the battery backup
+     * power is removed.
+     *
      * @return true if the configuration was successful, false otherwise
      */
     virtual bool configure() = 0;
