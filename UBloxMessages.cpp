@@ -2,6 +2,7 @@
 #include "UBloxGPSConstants.h"
 #include <cmath>
 #include <cstring>
+#include <cstdio>
 
 namespace
 {
@@ -39,9 +40,9 @@ GeodeticPosition parseNAV_POSLLH(const uint8_t* msgBuffer)
 #if UBLOX_GNSS_DEBUG
     printf(
         "Got NAV_POSLLH message.  Longitude=%.06f deg, Latitude=%.06f deg, Height=%.02f mm\r\n",
-        longitude,
-        latitude,
-        height);
+        pos.longitude,
+        pos.latitude,
+        pos.height);
 #endif
 
     return pos;
@@ -59,10 +60,10 @@ FixQuality parseNAV_SOL(const uint8_t* msgBuffer)
 
 #if UBLOX_GNSS_DEBUG
     printf("Got NAV_SOL message.  Fix quality=%" PRIu8
-                       ", Pos accuracy=%.02f m, Num satellites=%" PRIu8 "\r\n",
-        static_cast<uint8_t>(fixQuality),
-        posAccuracy,
-        numSatellites);
+                       ", Pos accuracy=%" PRIu32 " cm, Num satellites=%" PRIu8 "\r\n",
+        static_cast<uint8_t>(fix.fixQuality),
+        fix.posAccuracy,
+        fix.numSatellites);
 #endif
 
     return fix;
@@ -81,10 +82,10 @@ VelocityNED parseNAV_VELNED(const uint8_t* msgBuffer)
 #if UBLOX_GNSS_DEBUG
     printf("Got NAV_VELNED message.  North Vel=%" PRIi32 ", East Vel=%" PRIi32
                        ", Down Vel=%" PRIi32 ", 3D Speed=%" PRIi32 "\r\n",
-        northVel,
-        eastVel,
-        downVel,
-        speed3D);
+        velocity.northVel,
+        velocity.eastVel,
+        velocity.downVel,
+        velocity.speed3D);
 #endif
 
     return velocity;
@@ -104,12 +105,12 @@ UtcTime parseNAV_TIMEUTC(const uint8_t* msgBuffer)
 #if UBLOX_GNSS_DEBUG
     printf("Got NAV_TIMEUTC message.  year=%" PRIu16 ", month =%" PRIu8 ", day=%" PRIu8
                        ", hour = %" PRIu8 ", min = %" PRIu8 ", sec = %" PRIu8 "\r\n",
-        year,
-        month,
-        day,
-        hour,
-        minute,
-        second);
+        time.year,
+        time.month,
+        time.day,
+        time.hour,
+        time.minute,
+        time.second);
 #endif
 
     return time;
@@ -131,10 +132,10 @@ Timepulse parseTIM_TP(const uint8_t* msgBuffer)
     printf("Got TIM-TP message. time of week=%" PRIu32 ", sub ms time=%" PRIu32
                        ", week number= %d"
                        "Quantization error=%" PRIi32 ", flags=%d %d",
-        timeOfWeek,
-        subTimeOfWeek,
-        weekNumber,
-        timeQuantizationError,
+        pulse.tow.timeOfWeek,
+        pulse.tow.subTimeOfWeek,
+        pulse.tow.weekNumber,
+        pulse.timeQuantizationError,
         flag,
         refInfo);
 #endif
@@ -170,11 +171,10 @@ void parseNAV_PVT(const uint8_t* msgBuffer, GeodeticPosition& pos, VelocityNED& 
     time.second = static_cast<uint8_t>(msgBuffer[UBX_DATA_OFFSET + 10]);
 
 #if UBLOX_GNSS_DEBUG
-    printf("GOT NAV_PVT\r\n");
-    printf("NAV PVT: Longitude=%.06f deg, Latitude=%.06f deg, Height=%.02f mm\r\n",
-        longitude,
-        latitude,
-        height);
+    printf("Got NAV PVT: Longitude=%.06f deg, Latitude=%.06f deg, Height=%.02f mm\r\n",
+        pos.longitude,
+        pos.latitude,
+        pos.height);
 #endif
 }
 
