@@ -39,7 +39,7 @@ GeodeticPosition parseNAV_POSLLH(const uint8_t* msgBuffer)
 
 #if UBLOX_GNSS_DEBUG
     printf(
-        "Got NAV_POSLLH message.  Longitude=%.06f deg, Latitude=%.06f deg, Height=%.02f mm\r\n",
+        "Got NAV_POSLLH message.  Longitude=%.06f deg, Latitude=%.06f deg, Height=%" PRIi32 " mm\r\n",
         pos.longitude,
         pos.latitude,
         pos.height);
@@ -171,7 +171,7 @@ void parseNAV_PVT(const uint8_t* msgBuffer, GeodeticPosition& pos, VelocityNED& 
     time.second = static_cast<uint8_t>(msgBuffer[UBX_DATA_OFFSET + 10]);
 
 #if UBLOX_GNSS_DEBUG
-    printf("Got NAV PVT: Longitude=%.06f deg, Latitude=%.06f deg, Height=%.02f mm\r\n",
+    printf("Got NAV PVT: Longitude=%.06f deg, Latitude=%.06f deg, Height=%" PRIi32" mm\r\n",
         pos.longitude,
         pos.latitude,
         pos.height);

@@ -24,7 +24,11 @@ Note: It should also be possible to receive from these chips using a background 
 
 The MAX-8 is a smaller and cheaper GNSS module from U-Blox.  It can only receive from one GNSS at a time and lacks an SPI interface, but is a simple, proven, and cost-effective option for many systems.
 
+Note: The MAX-8 lacks flash storage, so any saved settings will be lost if the battery backed RAM loses power.
+
 In this driver, it can be used through the `MAX8I2C` class in `MAX8.h`.
+
+Note: In theory, the MAX-M8 should be able to be used as a drop-in replacement for this module and will appear the same to software but receive from three GNSS systems concurrently.  This has not been tested however. 
 
 ## ZED-F9P
 

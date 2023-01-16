@@ -484,8 +484,8 @@ int UBloxGPS::DEBUG(const char* format, ...)
 #if UBLOX_GNSS_DEBUG
     std::va_list arg;
     va_start(arg, format);
-    fflush(static_cast<std::FILE*>(*serialPort));
-    vfprintf(format, arg);
+    fflush(stdout);
+    int r = vfprintf(stdout, format, arg);
     va_end(arg);
     return r;
 #else

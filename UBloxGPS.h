@@ -67,12 +67,17 @@ public:
     bool begin(bool shouldConfigure);
 
     /**
-     * @brief Attempt to read messages before the timeout. If a message is received before the
-     * timeout period ends, continue reading until there is no data left. Otherwise, give up.
+     * @brief Attempts to read messages for a given amount of time.
      *
-     * @param timeout amount of time to wait for packets before giving up. If zero is passed to this
-     * argument, the function will try once and quit. Otherwise it will continue to read until the
-     * timeout is complete.
+     * If \c timeout is nonzero, any messages arriving before the end of the timeout will be parsed and saved
+     * to class variables.  Regardless of whether any messages arrive or not, will not return until the timeout
+     * has elapsed.  If any errors occur, will return immediately.
+     *
+     * If \c timeout is zero, the next pending packet will be read and parsed, and then this function
+     * will return immediately.  If you want to read all the pending packets without blocking, keep calling
+     * this function with timeout as zero until it returns zero.
+     *
+     * @param timeout amount of time to wait for packets before giving up.
      *
      * @return the total number of packets read.
      */
@@ -189,13 +194,6 @@ public:
      */
     AntennaPowerStatus antennaPowerStatus;
 
-protected:
-    /**
-     * Get the name of this GPS module for debug messages
-     * @return a c-string with the name of the GPS module
-     */
-    virtual const char* getName() = 0;
-
     /**
      * @brief Configure the GPS with the appropriate communications and message settings for this
      * driver. and save the configuration to NVM on the chip. After initial configuration, the
@@ -203,6 +201,13 @@ protected:
      * @return true if the configuration was successful, false otherwise
      */
     virtual bool configure() = 0;
+
+protected:
+    /**
+     * Get the name of this GPS module for debug messages
+     * @return a c-string with the name of the GPS module
+     */
+    virtual const char* getName() = 0;
 
     /**
      * @brief Assemble a packet with the given payload with the preable, length and checksum, and
