@@ -218,8 +218,12 @@ bool UBloxGPS::checkVersion(bool printVersion, bool printExtraInfo)
     {
         return false;
     }
+#if UBLOX_GNSS_DEBUG
+	// always print version
+	printVersion = true;
+#endif
 
-    if (printVersion || UBLOX_GNSS_DEBUG)
+    if (printVersion)
     {
         printf("-> %s Software Version: \r\n", getName());
         printf("-> %s\r\n", rxBuffer + UBX_DATA_OFFSET);
