@@ -70,6 +70,7 @@
 #define UBX_RXM_RAWX 0x15
 
 #define UBX_MESSAGE_START_CHAR 0xB5
+#define UBX_MESSAGE_START_CHAR2 0x62
 #define NMEA_MESSAGE_START_CHAR '$'
 
 // U-Blox Gen9 configuration IDs

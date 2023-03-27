@@ -1,5 +1,4 @@
 #include "UBloxGPSI2C.h"
-#include "internal/ScopeGuard.h"
 
 namespace UBlox
 {
@@ -29,118 +28,70 @@ bool UBloxGPSI2C::sendMessage(uint8_t* packet, uint16_t packetLen)
 
 UBloxGPS::ReadStatus UBloxGPSI2C::readMessage()
 {
-    int i2cOutputSize = readLen();
-    if (i2cOutputSize == -1)
-    {
-        printf("Didn't rcv ack from %s when reading length\r\n", getName());
-        return ReadStatus::ERR;
-    }
+    const size_t ubxHeaderLen = 6;
+	const size_t ubxChecksumLen = 2;
 
-    if (i2cOutputSize == 0)
-    {
-        // nothing to do
-        return ReadStatus::NO_DATA;
-    }
+	// First check how many bytes are in the buffer
+	int32_t bufLen = readLen();
+	if(bufLen < 0)
+	{
+		DEBUG("Didn't receive ack from %s reading len\r\n", getName());
+		return ReadStatus::ERR;
+	}
 
-    // Set up transaction via scope guard
-    auto initI2C = [this]()
-    {
-        i2cPort_.lock();
-        i2cPort_.start();
-    };
+	if(static_cast<uint32_t>(bufLen) < ubxHeaderLen)
+	{
+		// Not a full header in the buffer
+		return ReadStatus::NO_DATA;
+	}
 
-    auto cleanupI2C = [this]()
-    {
-        i2cPort_.stop();
-        i2cPort_.unlock();
-    };
+	if(i2cPort_.read((i2cAddress_ << 1) | 0x01, reinterpret_cast<char *>(rxBuffer), ubxHeaderLen) != 0)
+	{
+		DEBUG("Didn't receive ack from %s reading header\r\n", getName());
+		return ReadStatus::ERR;
+	}
 
-    {
-        // This will start the I2C transaction now, and end it whenever it goes out of scope (e.g. by returning
-        // from the function)
-        ScopeGuard<decltype(initI2C), decltype(cleanupI2C)> spiManager(initI2C, cleanupI2C);
+	// check format
+	if(rxBuffer[0] != UBX_MESSAGE_START_CHAR || rxBuffer[1] != UBX_MESSAGE_START_CHAR2)
+	{
+		DEBUG("Bad message header received from %s (magic bytes = %" PRIx8 " %" PRIx8"\r\n", getName(), rxBuffer[0], rxBuffer[1]);
+		return ReadStatus::ERR;
+	}
 
-        auto result = i2cPort_.write_byte((i2cAddress_ << 1) | 0x01);
+	size_t ubxMsgRemainingLen = (static_cast<uint16_t>(rxBuffer[5] << 8) | rxBuffer[4]) + ubxChecksumLen;
+	currMessageLength_ = ubxMsgRemainingLen + ubxHeaderLen;
 
-        if (result != I2C::ACK)
-        {
-            printf("Didn't receive ack from %s\r\n", getName());
-            return ReadStatus::ERR;
-        }
+	if(currMessageLength_ > MAX_MESSAGE_LEN)
+	{
+		// can't read this!
+		DEBUG("Message too long, %zu bytes.  Bailing out.\r\n", ubxMsgRemainingLen);
+		return ReadStatus::ERR;
+	}
 
-        currMessageLength_ = 0;
-        int ubxMsgLen = 100000; // large value to stop loop exit condition, will read real value later
+	// read rest of message
+	if(i2cPort_.read((i2cAddress_ << 1) | 0x01, reinterpret_cast<char *>(rxBuffer + ubxHeaderLen), ubxMsgRemainingLen) != 0)
+	{
+		DEBUG("Didn't receive ack from %s reading body\r\n", getName());
+		return ReadStatus::ERR;
+	}
 
-        // for loop in case there's a data error and we don't detect the last byte
-        for (int rxIndex = 0; rxIndex < i2cOutputSize; rxIndex++)
-        {
-            int readResult = i2cPort_.read_byte(true);
-            uint8_t incoming = static_cast<uint8_t>(readResult);
+	// add null terminator
+	rxBuffer[currMessageLength_] = 0;
 
-            if (rxIndex == 0)
-            {
-                if (incoming == NMEA_MESSAGE_START_CHAR)
-                {
-                    // NMEA sentences start with a dollars sign
-                    isNMEASentence = true;
-                }
-                else if (incoming == UBX_MESSAGE_START_CHAR)
-                {
-                    // UBX sentences start with a 0xB5
-                    isNMEASentence = false;
-                }
-                else if (incoming == 0xFF)
-                {
-                    DEBUG("Received 0xFF despite output buffer length > 0\r\n");
-                }
-                else
-                {
-                    printf("Unknown first character \r\n");
-                    return ReadStatus::ERR;
-                }
-            }
-            else if (rxIndex == 5 && !isNMEASentence)
-            {
-                // read length and change that to msg length
-                ubxMsgLen = (static_cast<uint16_t>(rxBuffer[rxIndex] << 8) | rxBuffer[rxIndex - 1]) + 8;
-                // non-payload body of a ubx message is 8
-            }
-
-            if (rxIndex <= MAX_MESSAGE_LEN)
-            {
-                rxBuffer[rxIndex] = incoming;
-                currMessageLength_++;
-            }
-
-            // if it's an NMEA sentence, there is a CRLF at the end
-            // if it's an UBX  sentence, there is a length passed before the payload
-            if ((isNMEASentence && incoming == '\n') || (!isNMEASentence && rxIndex == ubxMsgLen - 1))
-            {
-                break;
-            }
-        }
-
-        if (currMessageLength_ <= MAX_MESSAGE_LEN)
-        {
-            // add null terminator
-            rxBuffer[currMessageLength_] = 0;
-        }
-    }
-
-    DEBUG_TR("Read stream of %s: ", getName());
+	DEBUG("Read stream of %s: ", getName());
     for (size_t j = 0; j < currMessageLength_; j++)
     {
-        DEBUG_TR("%02" PRIx8, rxBuffer[j]);
+        DEBUG("%02" PRIx8, rxBuffer[j]);
     }
-    DEBUG_TR(";\r\n");
+    DEBUG(";\r\n");
 
     if (!verifyChecksum(currMessageLength_))
     {
-        printf("Checksums for UBX message don't match!\r\n");
+        DEBUG("Checksums for UBX message don't match!\r\n");
         return ReadStatus::ERR;
     }
 
-    processMessage();
+	processMessage();
 
     return ReadStatus::DONE;
 }

@@ -25,8 +25,10 @@ bool UBloxGen9::setValue(uint32_t key, uint64_t value, uint8_t layers)
     int totalLen = SETUP_BYTES + KEY_SIZE + valueLen;
     uint8_t data[MAX_DATA_LEN];
 
-    data[0] = 0;
+    data[0] = 0; // Version 0 of the message
     data[1] = layers;
+	data[2] = 0; // Reserved
+	data[3] = 0; // Reserved
 
     memcpy(data + SETUP_BYTES, &key, KEY_SIZE);
     memcpy(data + SETUP_BYTES + KEY_SIZE, &value, valueLen); // Assuming little endinaness
