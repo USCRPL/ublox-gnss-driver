@@ -116,6 +116,6 @@ int32_t UBloxGPSI2C::readLen()
         return -1;
     }
 
-    return (static_cast<uint16_t>(bytesAvailableContents[0] << 8) | bytesAvailableContents[0]);
+    return ((static_cast<uint16_t>(bytesAvailableContents[0]) << 8) | bytesAvailableContents[1]);
 }
 };
